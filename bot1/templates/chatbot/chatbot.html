@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JaiBot - Powered by Gemini</title>
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <style>
+        /* Professional Design System */
+        :root {
+            --primary: #3a6ea5;
+            --primary-light: #4a7ebb;
+            --primary-dark: #2a5e95;
+            --secondary: #f0f4f8;
+            --text: #333333;
+            --text-light: #6e6e6e;
+            --background: #ffffff;
+            --background-dark: #f5f7fa;
+            --border: #e0e0e0;
+            --success: #34a853;
+            --error: #ea4335;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --whatsapp-green: #25D366;
+            --whatsapp-dark-green: #128C7E;
+            --code-bg: #282c34;
+        }
+
+        /* General Styles */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--background-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--text);
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            background: var(--background);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: var(--primary);
+            color: white;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .header-title p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            background: var(--background);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 14px 18px;
+            border-radius: var(--radius-lg);
+            position: relative;
+            animation: fadeIn 0.3s ease-in-out;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: var(--radius-sm);
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background: var(--secondary);
+            color: var(--text);
+            border-bottom-left-radius: var(--radius-sm);
+            position: relative;
+        }
+
+        .message-indicator {
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: var(--text-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .message.bot:hover .copy-button {
+            opacity: 1;
+        }
+
+        .copy-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Code block styling */
+        .code-block {
+            position: relative;
+            margin: 10px 0;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #23272e;
+            color: #abb2bf;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .code-actions button {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 3px;
+            color: #abb2bf;
+            padding: 3px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .code-actions button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        pre {
+            margin: 0;
+            padding: 12px;
+            background: var(--code-bg);
+            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .message.bot pre {
+            max-width: 100%;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 16px 24px;
+            background: var(--background);
+            border-top: 1px solid var(--border);
+            gap: 12px;
+            align-items: center;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: var(--secondary);
+            border-radius: 24px;
+            padding: 0 6px 0 16px;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 12px 0;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            background: transparent;
+            color: var(--text);
+        }
+
+        .input-container input::placeholder {
+            color: var(--text-light);
+        }
+
+        /* WhatsApp-style send button */
+        .send-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--whatsapp-green);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease;
+        }
+
+        .send-button:hover {
+            background: var(--whatsapp-dark-green);
+        }
+
+        .send-icon {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .suggestions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .suggestions button {
+            padding: 8px 14px;
+            background: var(--background);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .suggestions button:hover {
+            background: var(--primary-light);
+            color: white;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Copy feedback animation */
+        @keyframes copiedFeedback {
+            0% { opacity: 0; transform: translateY(5px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-5px); }
+        }
+
+        .copy-feedback {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            top: -30px;
+            right: 10px;
+            animation: copiedFeedback 1.5s ease-in-out forwards;
+            pointer-events: none;
+        }
+
+        /* Scrollbar Styles */
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-box::-webkit-scrollbar-track {
+            background: var(--background);
+        }
+
+        .chat-box::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: var(--radius-sm);
+        }
+
+        .chat-box::-webkit-scrollbar-thumb:hover {
+            background: var(--text-light);
+        }
+
+        /* Bold Text Formatting */
+        .bold {
+            font-weight: 600;
+        }
+
+        /* Inline code */
+        .inline-code {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+            padding: 2px 5px;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                max-width: 100%;
+                border-radius: 0;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-title">
+                <div class="logo">J</div>
+                <div>
+                    <h1>JaiBot</h1>
+                    <p>Powered by Gemini</p>
+                </div>
+            </div>
+        </div>
+        <div class="chat-box" id="chat-box">
+            <!-- Initial welcome message -->
+            <div class="message bot">
+                <div class="message-indicator">JaiBot</div>
+                <div class="message-content">Hello, I'm JaiBot powered by Gemini. How can I help you today?</div>
+                <button class="copy-button" onclick="copyText(this.parentElement)">
+                    <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input type="text" id="user-input" placeholder="Type a message...">
+                <button class="send-button" onclick="sendMessage()">
+                    <svg class="send-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize highlight.js
+        document.addEventListener('DOMContentLoaded', () => {
+            hljs.configure({
+                languages: ['javascript', 'python', 'html', 'css', 'java', 'c', 'cpp', 'csharp', 'php']
+            });
+        });
+
+        // Function to format text with ** for bold and ` for inline code
+        function formatText(text) {
+            // First, handle code blocks
+            text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, language, code) {
+                const lang = language || 'plaintext';
+                const highlightedCode = hljs.highlight(code, {language: lang, ignoreIllegals: true}).value;
+                
+                return `<div class="code-block">
+                    <div class="code-header">
+                        <span>${lang !== 'plaintext' ? lang : 'code'}</span>
+                        <div class="code-actions">
+                            <button onclick="copyCode(this.parentElement.parentElement.nextElementSibling)">Copy</button>
+                        </div>
+                    </div>
+                    <pre><code class="hljs language-${lang}">${highlightedCode}</code></pre>
+                </div>`;
+            });
+
+            // Handle inline code
+            text = text.replace(/`([^`]+)`/g, '<span class="inline-code">$1</span>');
+            
+            // Handle bold text
+            text = text.replace(/\*\*(.*?)\*\*/g, '<span class="bold">$1</span>');
+            
+            return text;
+        }
+
+        // Function to copy code to clipboard
+        function copyCode(preElement) {
+            const codeElement = preElement.querySelector('code');
+            const textToCopy = codeElement.textContent;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // Create and show feedback element
+                const codeBlock = preElement.parentElement;
+                const feedback = document.createElement('div');
+                feedback.className = 'copy-feedback';
+                feedback.textContent = 'Code copied';
+                codeBlock.appendChild(feedback);
+                
+                // Remove feedback after animation completes
+                setTimeout(() => {
+                    feedback.remove();
+                }, 1500);
+            });
+        }
+
+        // Function to copy text to clipboard
+        function copyText(messageElement) {
+            const contentElement = messageElement.querySelector('.message-content');
+            let textContent = '';
+            
+            // If the message contains code blocks, extract them properly
+            const codeBlocks = contentElement.querySelectorAll('pre code');
+            if (codeBlocks.length > 0) {
+                // Get the text content excluding code blocks
+                const clone = contentElement.cloneNode(true);
+                const codeBlockElements = clone.querySelectorAll('.code-block');
+                
+                // Replace code blocks with markers
+                codeBlockElements.forEach((block, index) => {
+                    const codeElement = block.querySelector('code');
+                    const language = block.querySelector('.code-header span').textContent;
+                    block.outerHTML = `\n\`\`\`${language}\n${codeElement.textContent}\n\`\`\`\n`;
+                });
+                
+                textContent = clone.textContent;
+            } else {
+                textContent = contentElement.textContent;
+            }
+            
+            navigator.clipboard.writeText(textContent).then(() => {
+                // Create and show feedback element
+                const feedback = document.createElement('div');
+                feedback.className = 'copy-feedback';
+                feedback.textContent = 'Copied to clipboard';
+                messageElement.appendChild(feedback);
+                
+                // Remove feedback after animation completes
+                setTimeout(() => {
+                    feedback.remove();
+                }, 1500);
+            });
+        }
+
+        // Function to send a message
+        function sendMessage() {
+            const userInput = document.getElementById('user-input').value;
+            if (!userInput.trim()) return;
+
+            // Add user message to chat box
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `
+                <div class="message user">
+                    <div class="message-indicator">You</div>
+                    <div class="message-content">${formatText(userInput)}</div>
+                </div>
+            `;
+
+            // Scroll to bottom of chat box
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Clear input
+            document.getElementById('user-input').value = '';
+
+            // Show typing indicator
+            chatBox.innerHTML += `
+                <div class="message bot" id="typing-indicator">
+                    <div class="message-indicator">JaiBot</div>
+                    <div class="message-content">Typing...</div>
+                </div>
+            `;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Send message to server
+            fetch('/chatbot/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: `message=${encodeURIComponent(userInput)}`,
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove typing indicator
+                document.getElementById('typing-indicator').remove();
+                
+                if (data.response) {
+                    // Add bot response to chat box
+                    chatBox.innerHTML += `
+                        <div class="message bot">
+                            <div class="message-indicator">JaiBot</div>
+                            <div class="message-content">${formatText(data.response)}</div>
+                            <button class="copy-button" onclick="copyText(this.parentElement)">
+                                <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    
+                    // If there are code blocks, initialize syntax highlighting
+                    const codeBlocks = document.querySelectorAll('.message.bot:last-child pre code');
+                    if (codeBlocks.length > 0) {
+                        codeBlocks.forEach(block => {
+                            hljs.highlightElement(block);
+                        });
+                    }
+                } else if (data.error) {
+                    // Display error
+                    chatBox.innerHTML += `
+                        <div class="message bot">
+                            <div class="message-indicator">JaiBot</div>
+                            <div class="message-content">I apologize, but I encountered an error: ${data.error}</div>
+                            <button class="copy-button" onclick="copyText(this.parentElement)">
+                                <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                }
+                // Scroll to bottom of chat box
+                chatBox.scrollTop = chatBox.scrollHeight;
+            })
+            .catch(error => {
+                // Remove typing indicator
+                document.getElementById('typing-indicator').remove();
+                
+                // Display network error
+                chatBox.innerHTML += `
+                    <div class="message bot">
+                        <div class="message-indicator">JaiBot</div>
+                        <div class="message-content">I apologize, but there was a network error. Please try again.</div>
+                        <button class="copy-button" onclick="copyText(this.parentElement)">
+                            <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        // Allow pressing Enter to send a message
+        document.getElementById('user-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Add suggestions if needed
+        function addSuggestions() {
+            const suggestions = document.createElement('div');
+            suggestions.className = 'suggestions';
+            suggestions.id = 'suggestions';
+            
+            suggestions.innerHTML = `
+                <button onclick="sendSuggestion('Show me an example of JavaScript code')">JavaScript example</button>
+                <button onclick="sendSuggestion('How to use CSS Flexbox')">CSS Flexbox</button>
+                <button onclick="sendSuggestion('Python function example')">Python function</button>
+                <button onclick="sendSuggestion('HTML template for a form')">HTML form</button>
+            `;
+            
+            document.querySelector('.input-wrapper').insertAdjacentElement('beforebegin', suggestions);
+        }
+
+        // Function to send a suggestion
+        function sendSuggestion(suggestion) {
+            document.getElementById('user-input').value = suggestion;
+            sendMessage();
+        }
+
+        // Example function to simulate a code response for testing
+        function testCodeResponse() {
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `
+                <div class="message bot">
+                    <div class="message-indicator">JaiBot</div>
+                    <div class="message-content">
+                        Here's an example of a JavaScript function:
+                        
+                        \`\`\`javascript
+                        function calculateTotal(items) {
+                          // Apply discount for quantities over 10
+                          return items.reduce((total, item) => {
+                            const price = item.quantity > 10 
+                              ? item.price * 0.9 
+                              : item.price;
+                            return total + (price * item.quantity);
+                          }, 0);
+                        }
+                        
+                        // Example usage
+                        const cart = [
+                          { name: "Widget", price: 9.99, quantity: 3 },
+                          { name: "Gadget", price: 14.99, quantity: 12 }
+                        ];
+                        
+                        const total = calculateTotal(cart);
+                        console.log(\`Total: $\${total.toFixed(2)}\`);
+                        \`\`\`
+                        
+                        You can use this function to calculate totals with automatic discounts for bulk purchases.
+                    </div>
+                    <button class="copy-button" onclick="copyText(this.parentElement)">
+                        <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            // Process the code blocks with highlight.js
+            const codeBlocks = document.querySelectorAll('.message.bot:last-child pre code');
+            if (codeBlocks.length > 0) {
+                codeBlocks.forEach(block => {
+                    hljs.highlightElement(block);
+                });
+            }
+            
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
